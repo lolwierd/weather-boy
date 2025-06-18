@@ -6,13 +6,12 @@ import (
 
 	"github.com/lolwierd/weatherboy/be/internal/config"
 	"github.com/lolwierd/weatherboy/be/internal/db"
-	"github.com/lolwierd/weatherboy/be/internal/opentelemetry"
 )
 
 func init() {
 	config.LoadEnv()
 	// Setup OTEL
-	opentelemetry.InitOtel()
+	// opentelemetry.InitOtel()
 
 	// Setup DB
 	db.InitDBPool(

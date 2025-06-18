@@ -1,4 +1,3 @@
--- +migrate Up
 CREATE TABLE IF NOT EXISTS bulletin (
     id SERIAL PRIMARY KEY,
     location TEXT NOT NULL,
@@ -26,8 +25,3 @@ CREATE TABLE IF NOT EXISTS nowcast (
     mm_per_hr NUMERIC NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-
--- +migrate Down
-DROP TABLE IF EXISTS nowcast;
-DROP TABLE IF EXISTS radar_snapshot;
-DROP TABLE IF EXISTS bulletin;

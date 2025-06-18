@@ -20,9 +20,9 @@ func Healthcheck() {
 				IsHealthy = false
 				isAnyoneUnhealthy = true
 			}
-			if !isOTELHealthy() {
-				logger.Warn.Println("otel is unhealthy")
-			}
+			// if !isOTELHealthy() {
+			// 	logger.Warn.Println("otel is unhealthy")
+			// }
 			if !isAnyoneUnhealthy {
 				IsHealthy = true
 			}
