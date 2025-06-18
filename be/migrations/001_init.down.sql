@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS nowcast;
+DROP TABLE IF EXISTS radar_snapshot;
+DROP TABLE IF EXISTS bulletin;

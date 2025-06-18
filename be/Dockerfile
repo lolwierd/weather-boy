@@ -1,12 +1,12 @@
-FROM golang:1.23 AS builder
+FROM golang:1.24 AS builder
 
 WORKDIR /app
 
 RUN apt-get update -y && apt-get install gh
 
 RUN --mount=type=secret,id=GITHUB_TOKEN \
-    gh auth login --with-token < /run/secrets/GITHUB_TOKEN && \
-    gh auth setup-git
+  gh auth login --with-token < /run/secrets/GITHUB_TOKEN && \
+  gh auth setup-git
 
 COPY go.mod go.sum ./
 

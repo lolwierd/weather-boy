@@ -1,0 +1,11 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./tmp/weatherboyapi ./cmd/weatherboyapi"
+  bin = "./tmp/weatherboyapi"
+  include_ext = ["go"]
+  exclude_dir = ["tmp", "vendor"]
+
+[log]
+  level = "debug"
