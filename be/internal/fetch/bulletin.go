@@ -17,7 +17,7 @@ import (
 
 // FetchBulletinOnce downloads today's Gujarat bulletin PDF and stores it.
 func FetchBulletinOnce(ctx context.Context) error {
-	const url = "https://mausam.imd.gov.in/Backend/uploads/REVAMP_GMFC/mcdata/gujarat.pdf"
+	const url = "https://mausam.imd.gov.in/ahmedabad/mcdata/state.pdf"
 
 	resp, err := http.Get(url)
 	if err != nil {
