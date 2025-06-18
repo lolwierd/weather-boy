@@ -26,18 +26,18 @@ func bucketToMMPerHr(bucket int) float64 {
 	return mapping[bucket]
 }
 
-// metNetResp represents the minimal subset of the MetNet response we care about.
-type metNetResp struct {
-	CapturedAt  time.Time `json:"start_time"`
+// imdNowcastResp represents the subset of the IMD nowcast response we care about.
+type imdNowcastResp struct {
+	CapturedAt  time.Time `json:"captured_at"`
 	StepMinutes int       `json:"step_minutes"`
 	POP         []float64 `json:"pop"`
 	Intensity   []int     `json:"precip_intensity"`
 }
 
-// FetchMetNetNowcast fetches nowcast data from MetNet for Vadodara and stores it.
-func FetchMetNetNowcast(ctx context.Context) error {
+// FetchIMDNowcast fetches nowcast data from the IMD API for Vadodara and stores it.
+func FetchIMDNowcast(ctx context.Context) error {
 	config.LoadEnv()
-	url := fmt.Sprintf("%s/%.2f,%.2f", config.MetNetBaseURL, 22.30, 73.20)
+	url := fmt.Sprintf("%s/%.2f,%.2f", config.IMDNowcastURL, 22.30, 73.20)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return err
@@ -49,15 +49,15 @@ func FetchMetNetNowcast(ctx context.Context) error {
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		b, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("metnet status %s: %s", resp.Status, string(b))
+		return fmt.Errorf("imd nowcast status %s: %s", resp.Status, string(b))
 	}
 
-	var data metNetResp
+	var data imdNowcastResp
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return err
 	}
 	if data.StepMinutes == 0 {
-		data.StepMinutes = 5
+		data.StepMinutes = 15
 	}
 	for i := 0; i < len(data.POP) && i < len(data.Intensity); i++ {
 		n := model.Nowcast{

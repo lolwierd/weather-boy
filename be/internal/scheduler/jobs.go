@@ -39,7 +39,7 @@ func Start() {
 		jitter := time.Duration(rand.Intn(60)-30) * time.Second
 		time.Sleep(jitter)
 		logger.Info.Println("cron: nowcast fetch")
-		if err := fetch.FetchMetNetNowcast(context.Background()); err != nil {
+		if err := fetch.FetchIMDNowcast(context.Background()); err != nil {
 			logger.Error.Println("fetch nowcast:", err)
 		}
 	})
