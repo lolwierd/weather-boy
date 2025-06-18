@@ -84,8 +84,8 @@ return `score` and per-sensor breakdown so UI can justify itself.
 - [x] implement `internal/fetch/bulletin.go` (pdf grab + cache)
 - [ ] implement `internal/parse/bulletin.go` (slice + o3)
 - [ ] implement `internal/fetch/radar.go` & parser
-- [ ] wire cron jobs in `internal/scheduler/jobs.go`
-- [ ] expose new `/v1/risk/:loc` route
+- [x] wire cron jobs in `internal/scheduler/jobs.go`
+- [x] expose new `/v1/risk/:loc` route
 - [ ] seed frontend with mock JSON until IMD API lives
 
 after IMD whitelist:
