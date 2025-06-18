@@ -13,6 +13,11 @@ func GetDBDriver() *Driver {
 	return dbDriver
 }
 
+// SetDBDriver replaces the global driver. Intended for tests.
+func SetDBDriver(d *Driver) {
+	dbDriver = d
+}
+
 // TODO think about cleaning up idle DB connections.
 func InitDBPool(dsn string) {
 	dbDriver = new(Driver)

@@ -15,27 +15,8 @@ import (
 // Remember to call defer conn.Release()!
 func getConnTransaction(ctx context.Context) (conn *pgxpool.Conn, tx pgx.Tx, err error) {
 	dbDriver := db.GetDBDriver()
-	conn, err = dbDriver.ConnPool.Acquire(ctx)
-	if err != nil {
-		return
-	}
-
-	tx, err = conn.Begin(ctx)
-	if err != nil {
-		return
-	}
-	return
-}
-
-// Returns a pgx connection.
-// Remember to call defer conn.Release()!
-func getConn(ctx context.Context) (conn *pgxpool.Conn, err error) {
-	dbDriver := db.GetDBDriver()
-	conn, err = dbDriver.ConnPool.Acquire(ctx)
-	if err != nil {
-		return
-	}
-	return
+	tx, err = dbDriver.ConnPool.BeginTx(ctx, pgx.TxOptions{})
+	return nil, tx, err
 }
 
 func generateIPv6FromMAC(ipv6Cidr netip.Prefix, mac string) string {

@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS bulletin_raw (
+    id SERIAL PRIMARY KEY,
+    path TEXT NOT NULL,
+    fetched_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);

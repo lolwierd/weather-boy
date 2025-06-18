@@ -81,7 +81,7 @@ return `score` and per-sensor breakdown so UI can justify itself.
 
 ## 6. open tasks (2025-06-18)
 
-- [ ] implement `internal/fetch/bulletin.go` (pdf grab + cache)
+- [x] implement `internal/fetch/bulletin.go` (pdf grab + cache)
 - [ ] implement `internal/parse/bulletin.go` (slice + o3)
 - [ ] implement `internal/fetch/radar.go` & parser
 - [ ] wire cron jobs in `internal/scheduler/jobs.go`
