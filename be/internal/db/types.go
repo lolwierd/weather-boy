@@ -1,9 +1,10 @@
 package db
 
 import (
+	"context"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
@@ -34,8 +35,15 @@ const (
 	pgxpoolTotalConns              = "pgxpool_total_conns"
 )
 
+// ConnPool abstracts the pgxpool.Pool methods used in the repository.
+type ConnPool interface {
+	BeginTx(context.Context, pgx.TxOptions) (pgx.Tx, error)
+	Ping(context.Context) error
+	Close()
+}
+
 type Driver struct {
-	ConnPool *pgxpool.Pool
+	ConnPool ConnPool
 }
 
 type tracer struct {
