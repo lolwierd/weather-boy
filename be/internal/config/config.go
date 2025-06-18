@@ -13,6 +13,7 @@ var (
 	OpenAIAPIKey  string
 	DataDir       string
 	MetNetBaseURL string
+	IMDNowcastURL string
 )
 
 // LoadEnv loads environment variables from .env once and populates typed vars.
@@ -22,5 +23,6 @@ func LoadEnv() {
 		OpenAIAPIKey = os.Getenv("OPENAI_API_KEY")
 		DataDir = os.Getenv("DATA_DIR")
 		MetNetBaseURL = os.Getenv("METNET_BASE_URL")
+		IMDNowcastURL = os.Getenv("IMD_NOWCAST_URL")
 	})
 }

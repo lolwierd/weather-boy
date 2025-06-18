@@ -6,6 +6,7 @@ import (
 
 	"github.com/lolwierd/weatherboy/be/internal/config"
 	"github.com/lolwierd/weatherboy/be/internal/db"
+	"github.com/lolwierd/weatherboy/be/internal/scheduler"
 )
 
 func init() {
@@ -22,4 +23,6 @@ func init() {
 			os.Getenv("POSTGRES_DB"),
 			os.Getenv("POSTGRES_PORT")),
 	)
+
+	scheduler.Start()
 }
