@@ -115,17 +115,19 @@ The Weather Boy backend is a Go-based service designed for reliability, observab
 
 ## Configuration
 
-All sensitive and environment-specific configuration is managed via environment variables, typically loaded from a `.env` file. Key variables include:
+All sensitive and environment-specific configuration is managed via environment variables and is automatically loaded from a `.env` file by the `config` package. Key variables include:
 
 - `POSTGRES_HOST`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_PORT`
 - `OTELCOL_HOST`, `OTELCOL_PORT`
 - `LISTEN_ADDR`
+- `OPENAI_API_KEY`, `DATA_DIR`, `METNET_BASE_URL`
 
 
 ## Development & Operations
 
 - **Build:** `make build`
 - **Run:** `make run` (loads `.env`, builds, and runs the binary)
+- **Dev:** `make dev` (docker compose with hot reload via Air)
 - **Test:** `make test`
 - **Clean:** `make clean`
 - **Docker:** Use the provided `Dockerfile` for containerization.
