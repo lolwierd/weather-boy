@@ -12,6 +12,7 @@ type stubRepo struct {
 	dbz      float64
 	rng      float64
 	pop      float64
+	cats     map[int]int16
 }
 
 func (s stubRepo) LatestBulletin(ctx context.Context, loc string) (*model.Bulletin, error) {
@@ -32,6 +33,12 @@ func (s stubRepo) NowcastPOP1H(ctx context.Context, loc string) (float64, error)
 	}
 	return s.pop, nil
 }
+func (s stubRepo) LatestNowcastCategories(ctx context.Context, loc string) (map[int]int16, error) {
+	if s.cats == nil {
+		return nil, context.Canceled
+	}
+	return s.cats, nil
+}
 
 func TestRiskLevels(t *testing.T) {
 	cases := []struct {
@@ -39,10 +46,10 @@ func TestRiskLevels(t *testing.T) {
 		repo  stubRepo
 		level string
 	}{
-		{"red", stubRepo{"heavy rain", 50, 30, 0.8}, "RED"},
-		{"orange", stubRepo{"heavy rain", 0, 0, 0.8}, "ORANGE"},
-		{"yellow", stubRepo{"heavy rain", 0, 0, 0}, "YELLOW"},
-		{"green", stubRepo{"", 0, 0, 0}, "GREEN"},
+		{"red", stubRepo{"heavy rain", 50, 30, 0.8, map[int]int16{2: 1}}, "RED"},
+		{"orange", stubRepo{"heavy rain", 0, 0, 0.8, map[int]int16{2: 1}}, "ORANGE"},
+		{"orange2", stubRepo{"heavy rain", 0, 0, 0, map[int]int16{2: 1}}, "ORANGE"},
+		{"green", stubRepo{"", 0, 0, 0, nil}, "GREEN"},
 	}
 	for _, tc := range cases {
 		SetRepo(tc.repo)

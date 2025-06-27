@@ -13,6 +13,7 @@ type Repo interface {
 	LatestBulletin(ctx context.Context, loc string) (*model.Bulletin, error)
 	LatestRadarSnapshot(ctx context.Context, loc string) (*model.RadarSnapshot, error)
 	NowcastPOP1H(ctx context.Context, loc string) (float64, error)
+	LatestNowcastCategories(ctx context.Context, loc string) (map[int]int16, error)
 }
 
 // repo is the default backing repo used in production.
@@ -31,6 +32,9 @@ func (dbRepo) LatestRadarSnapshot(ctx context.Context, loc string) (*model.Radar
 }
 func (dbRepo) NowcastPOP1H(ctx context.Context, loc string) (float64, error) {
 	return repository.NowcastPOP1H(ctx, loc)
+}
+func (dbRepo) LatestNowcastCategories(ctx context.Context, loc string) (map[int]int16, error) {
+	return repository.LatestNowcastCategories(ctx, loc)
 }
 
 // Result is the risk score output.
@@ -69,6 +73,22 @@ func riskLevel(ctx context.Context, r Repo, loc string) (Result, error) {
 		if pop >= 0.7 {
 			res.Score += 0.2
 			res.Breakdown["nowcast"] = 0.2
+		}
+	}
+
+	if cats, err := r.LatestNowcastCategories(ctx, loc); err == nil {
+		catScore := 0.0
+		severeMap := map[int]float64{2: 0.1, 3: 0.1}
+		for k, val := range cats {
+			if val > 0 {
+				if sc, ok := severeMap[k]; ok {
+					catScore += sc
+				}
+			}
+		}
+		if catScore > 0 {
+			res.Score += catScore
+			res.Breakdown["categories"] = catScore
 		}
 	}
 

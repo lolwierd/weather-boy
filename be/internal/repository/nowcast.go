@@ -51,3 +51,26 @@ func InsertNowcastRaw(ctx context.Context, nr *model.NowcastRaw) error {
 	}
 	return tx.Commit(ctx)
 }
+
+// InsertNowcastCategory stores a category value for a nowcast row.
+func InsertNowcastCategory(ctx context.Context, c *model.NowcastCategory) error {
+	conn, tx, err := getConnTransaction(ctx)
+	if err != nil {
+		return err
+	}
+	if conn != nil {
+		defer conn.Release()
+	}
+
+	row := tx.QueryRow(ctx,
+		`INSERT INTO nowcast_category (nowcast_id, category, value)
+         VALUES ($1,$2,$3)
+         RETURNING id`,
+		c.NowcastID, c.Category, c.Value,
+	)
+	if err := row.Scan(&c.ID); err != nil {
+		_ = tx.Rollback(ctx)
+		return err
+	}
+	return tx.Commit(ctx)
+}
