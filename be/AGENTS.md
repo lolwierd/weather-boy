@@ -16,18 +16,19 @@ Welcome to the backend codebase for **Weather Boy**! This document is designed t
     - [Health Checking](#health-checking)
     - [Database Layer](#database-layer)
     - [Observability & Telemetry](#observability--telemetry)
+    - [Scheduler](#scheduler)
+    - [Risk Scoring](#risk-scoring)
     - [Graceful Shutdown](#graceful-shutdown)
 5. [Configuration](#configuration)
-6. [Billing Logic](#billing-logic)
-7. [Development & Operations](#development--operations)
-8. [Extending the Codebase](#extending-the-codebase)
-9. [References](#references)
+6. [Development & Operations](#development--operations)
+7. [Extending the Codebase](#extending-the-codebase)
+8. [References](#references)
 
 ---
 
 ## Overview
 
-The Weather Boy backend is a Go-based service designed for reliability, observability, and maintainability. It leverages the Fiber web framework for HTTP APIs, PostgreSQL for persistence, and OpenTelemetry for distributed tracing and metrics.
+The Weather Boy backend is a Go service that periodically pulls multiple IMD data sources (bulletin PDFs, radar snapshots and nowcast JSON), stores them in PostgreSQL and exposes them via a small Fiber API. A risk score is calculated from these feeds and surfaced at `/v1/risk/:loc`. The project emphasizes observability via OpenTelemetry and structured logging using zap.
 
 ---
 
@@ -35,19 +36,24 @@ The Weather Boy backend is a Go-based service designed for reliability, observab
 
 - `cmd/weatherboyapi/` – Application entry point (`main.go`, `init.go`)
 - `internal/`
+    - `config/` – Environment loading and location list
     - `constants/` – Service-wide constants
     - `db/` – Database connection and utilities
+    - `fetch/` – IMD data fetchers
     - `handlers/` – HTTP route handlers
     - `healthcheck/` – Health monitoring logic
-    - `logger/` – Logging setup
+    - `logger/` – Zap-based structured logging
+    - `model/` – Database models
     - `opentelemetry/` – OTEL setup and utilities
     - `otelware/` – Fiber middleware for tracing/metrics
-    - `repository/` – (Placeholder for data access logic)
+    - `repository/` – Database access helpers
     - `router/` – HTTP server and route registration
+    - `scheduler/` – Cron jobs for fetching data
+    - `score/` – Risk scoring logic
     - `shutdown/` – Graceful shutdown logic
     - `types/` – Shared types
     - `utils/` – Utility functions
-- `Makefile` – Build, run, test, and clean commands
+- `Makefile` – Build, run, migrate, dev, and clean commands
 - `Dockerfile` – Containerization
 
 ---
@@ -104,6 +110,21 @@ The Weather Boy backend is a Go-based service designed for reliability, observab
     - Adds tracing and metrics to all HTTP requests.
     - Customizable via options.
 
+### Scheduler
+
+- **Cron Jobs:** `internal/scheduler/jobs.go`
+    - Fetches bulletin PDFs daily at 18:30 IST.
+    - Fetches nowcast JSON every 15 minutes with ±30 s jitter.
+    - Jobs run in the Asia/Kolkata timezone.
+
+### Risk Scoring
+
+- **Logic:** `internal/score/score.go`
+    - Bulletin heavy/very-heavy mention → +0.4
+    - Radar ≥45 dBZ within 40 km → +0.4
+    - Nowcast POP₁ₕ ≥0.7 → +0.2
+    - Thresholds: ≥0.8 = RED, ≥0.5 = ORANGE, ≥0.3 = YELLOW, else GREEN.
+
 ### Graceful Shutdown
 
 - **Handler:** `internal/shutdown/handleshutdown.go`
@@ -120,7 +141,7 @@ All sensitive and environment-specific configuration is managed via environment 
 - `POSTGRES_HOST`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_PORT`
 - `OTELCOL_HOST`, `OTELCOL_PORT`
 - `LISTEN_ADDR`
-- `OPENAI_API_KEY`, `DATA_DIR`, `METNET_BASE_URL`
+- `OPENAI_API_KEY`, `DATA_DIR`, `METNET_BASE_URL`, `IMD_NOWCAST_URL`
 
 
 ## Development & Operations
@@ -128,7 +149,8 @@ All sensitive and environment-specific configuration is managed via environment 
 - **Build:** `make build`
 - **Run:** `make run` (loads `.env`, builds, and runs the binary)
 - **Dev:** `make dev` (docker compose with hot reload via Air)
-- **Test:** `make test`
+- **Migrate:** `make migrate` to apply DB schema changes
+- **Test:** `go test ./...`
 - **Clean:** `make clean`
 - **Docker:** Use the provided `Dockerfile` for containerization.
 
@@ -140,6 +162,8 @@ All sensitive and environment-specific configuration is managed via environment 
 - **Add Database Logic:** Extend `internal/db/` and/or create repositories in `internal/repository/`.
 - **Add Metrics/Tracing:** Use OpenTelemetry APIs or extend `otelware` middleware.
 - **Add Health Checks:** Extend `internal/healthcheck/healthcheck.go` as needed.
+- **Add Fetch Jobs:** Modify `internal/scheduler/jobs.go` and add code under `internal/fetch/`.
+- **Tweak Scoring:** Update logic in `internal/score/score.go` as the risk model evolves.
 
 ---
 
@@ -148,7 +172,6 @@ All sensitive and environment-specific configuration is managed via environment 
 - [Fiber Documentation](https://docs.gofiber.io/)
 - [pgx PostgreSQL Driver](https://github.com/jackc/pgx)
 - [OpenTelemetry for Go](https://opentelemetry.io/docs/instrumentation/go/)
-- [Project Billing Algorithm](docs/billing_algorithm.md)
 
 ---
 
