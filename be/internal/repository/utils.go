@@ -11,8 +11,9 @@ import (
 	"github.com/lolwierd/weatherboy/be/internal/db"
 )
 
-// Returns a pgx connection and a transaction associated with it.
-// Remember to call defer conn.Release()!
+// getConnTransaction starts a transaction using the global connection pool.
+// The returned connection is always nil because `pgxpool` manages connection
+// lifecycles internally.
 func getConnTransaction(ctx context.Context) (conn *pgxpool.Conn, tx pgx.Tx, err error) {
 	dbDriver := db.GetDBDriver()
 	tx, err = dbDriver.ConnPool.BeginTx(ctx, pgx.TxOptions{})
