@@ -24,6 +24,9 @@ func Start() {
 
 	// Bulletin every day 18:30 IST
 	_, err := c.AddFunc("CRON_TZ=Asia/Kolkata 30 18 * * *", func() {
+		// jitter ±30s
+		jitter := time.Duration(rand.Intn(60)-30) * time.Second
+		time.Sleep(jitter)
 		logger.Info.Println("cron: bulletin fetch")
 		if err := fetch.FetchBulletinOnce(context.Background()); err != nil {
 			logger.Error.Println("fetch bulletin:", err)
@@ -51,4 +54,19 @@ func Start() {
 	for _, e := range c.Entries() {
 		logger.Info.Printf("cron next run %s\n", e.Next.Format(time.RFC3339))
 	}
+
+	// run all jobs once at startup
+	go func() {
+		logger.Info.Println("initial bulletin fetch")
+		if err := fetch.FetchBulletinOnce(context.Background()); err != nil {
+			logger.Error.Println("fetch bulletin:", err)
+		}
+	}()
+
+	go func() {
+		logger.Info.Println("initial nowcast fetch")
+		if err := fetch.FetchIMDNowcast(context.Background()); err != nil {
+			logger.Error.Println("fetch nowcast:", err)
+		}
+	}()
 }
