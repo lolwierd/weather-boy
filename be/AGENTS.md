@@ -125,6 +125,13 @@ The Weather Boy backend is a Go service that periodically pulls multiple IMD dat
     - Extracts the `color` field and maps it to a POP value via `colorToPOP()`.
     - Persists `cat1..cat19` flags in `nowcast_category` linked to each nowcast row.
 
+### District Warnings
+
+- **Fetcher:** `internal/fetch/districtwarning.go`
+    - Hits `https://mausam.imd.gov.in/api/warnings_district_api.php?id={DistrictID}`.
+    - Stores raw JSON in `district_warning_raw`.
+    - Parses day 1–5 warning text and color codes into `district_warning`.
+
 ### Risk Scoring
 
 - **Logic:** `internal/score/score.go`

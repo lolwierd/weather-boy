@@ -55,14 +55,14 @@ type NowcastRaw struct {
 	FetchedAt time.Time `db:"fetched_at"`
 }
 
-<<<<<<< Updated upstream
 // NowcastCategory stores category flags for a nowcast row.
 type NowcastCategory struct {
 	ID        int   `db:"id"`
 	NowcastID int   `db:"nowcast_id"`
 	Category  int   `db:"category"`
 	Value     int16 `db:"value"`
-=======
+}
+
 // DistrictWarning mirrors the `district_warning` table.
 type DistrictWarning struct {
 	ID          int       `db:"id"`
@@ -87,5 +87,4 @@ type DistrictWarningRaw struct {
 	Location  string    `db:"location"`
 	Data      []byte    `db:"data"`
 	FetchedAt time.Time `db:"fetched_at"`
->>>>>>> Stashed changes
 }

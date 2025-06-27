@@ -24,7 +24,7 @@ func Start() {
 
 	// Bulletin every day 18:30 IST
 	_, err := c.AddFunc("CRON_TZ=Asia/Kolkata 30 18 * * *", func() {
-		// jitter ±30s
+		// jitter +/-30s
 		jitter := time.Duration(rand.Intn(60)-30) * time.Second
 		time.Sleep(jitter)
 		logger.Info.Println("cron: bulletin fetch")
@@ -38,7 +38,7 @@ func Start() {
 
 	// Nowcast every 15 minutes with jitter
 	_, err = c.AddFunc("CRON_TZ=Asia/Kolkata */15 * * * *", func() {
-		// jitter ±30s
+		// jitter +/-30s
 		jitter := time.Duration(rand.Intn(60)-30) * time.Second
 		time.Sleep(jitter)
 		logger.Info.Println("cron: nowcast fetch")
@@ -52,7 +52,7 @@ func Start() {
 
 	// District warnings every day 18:00 IST
 	_, err = c.AddFunc("CRON_TZ=Asia/Kolkata 0 18 * * *", func() {
-		// jitter 30s
+		// jitter +/-30s
 		jitter := time.Duration(rand.Intn(60)-30) * time.Second
 		time.Sleep(jitter)
 		logger.Info.Println("cron: district warning fetch")

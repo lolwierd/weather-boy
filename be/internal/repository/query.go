@@ -79,7 +79,7 @@ func NowcastSlice(ctx context.Context, loc string) ([]model.Nowcast, error) {
 
 // LatestNowcastCategories returns category values for the latest nowcast row.
 func LatestNowcastCategories(ctx context.Context, loc string) (map[int]int16, error) {
-	_, tx, err := getConnTransaction(ctx)
+	_, tx, err := GetConnTransaction(ctx)
 	if err != nil {
 		return nil, err
 	}
