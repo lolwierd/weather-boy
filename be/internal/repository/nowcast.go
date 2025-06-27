@@ -28,3 +28,26 @@ func InsertNowcast(ctx context.Context, n *model.Nowcast) error {
 	}
 	return tx.Commit(ctx)
 }
+
+// InsertNowcastRaw stores the raw nowcast JSON.
+func InsertNowcastRaw(ctx context.Context, nr *model.NowcastRaw) error {
+	conn, tx, err := getConnTransaction(ctx)
+	if err != nil {
+		return err
+	}
+	if conn != nil {
+		defer conn.Release()
+	}
+
+	row := tx.QueryRow(ctx,
+		`INSERT INTO nowcast_raw (location, data, fetched_at)
+         VALUES ($1,$2,$3)
+         RETURNING id`,
+		nr.Location, nr.Data, nr.FetchedAt,
+	)
+	if err := row.Scan(&nr.ID); err != nil {
+		_ = tx.Rollback(ctx)
+		return err
+	}
+	return tx.Commit(ctx)
+}

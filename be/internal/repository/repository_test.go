@@ -83,3 +83,23 @@ func TestInsertIMDAPICall(t *testing.T) {
 		t.Fatalf("expectations: %v", err)
 	}
 }
+
+func TestInsertNowcastRaw(t *testing.T) {
+	mock := setupMock(t)
+	defer mock.Close()
+
+	mock.ExpectBegin()
+	mock.ExpectQuery("INSERT INTO nowcast_raw").
+		WithArgs("vadodara", pgxmock.AnyArg(), pgxmock.AnyArg()).
+		WillReturnRows(pgxmock.NewRows([]string{"id"}).AddRow(1))
+	mock.ExpectCommit()
+
+	nr := &model.NowcastRaw{Location: "vadodara", Data: []byte("{}"), FetchedAt: time.Now()}
+	if err := InsertNowcastRaw(context.Background(), nr); err != nil {
+		t.Fatalf("insert raw: %v", err)
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("expectations: %v", err)
+	}
+}
