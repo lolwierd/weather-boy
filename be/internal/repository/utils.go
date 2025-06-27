@@ -14,7 +14,15 @@ import (
 // getConnTransaction starts a transaction using the global connection pool.
 // The returned connection is always nil because `pgxpool` manages connection
 // lifecycles internally.
-func getConnTransaction(ctx context.Context) (conn *pgxpool.Conn, tx pgx.Tx, err error) {
+func GetConn(ctx context.Context) (*pgxpool.Conn, error) {
+	dbDriver := db.GetDBDriver()
+	return dbDriver.ConnPool.Acquire(ctx)
+}
+
+// getConnTransaction starts a transaction using the global connection pool.
+// The returned connection is always nil because `pgxpool` manages connection
+// lifecycles internally.
+func GetConnTransaction(ctx context.Context) (conn *pgxpool.Conn, tx pgx.Tx, err error) {
 	dbDriver := db.GetDBDriver()
 	tx, err = dbDriver.ConnPool.BeginTx(ctx, pgx.TxOptions{})
 	return nil, tx, err

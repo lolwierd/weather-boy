@@ -55,10 +55,37 @@ type NowcastRaw struct {
 	FetchedAt time.Time `db:"fetched_at"`
 }
 
+<<<<<<< Updated upstream
 // NowcastCategory stores category flags for a nowcast row.
 type NowcastCategory struct {
 	ID        int   `db:"id"`
 	NowcastID int   `db:"nowcast_id"`
 	Category  int   `db:"category"`
 	Value     int16 `db:"value"`
+=======
+// DistrictWarning mirrors the `district_warning` table.
+type DistrictWarning struct {
+	ID          int       `db:"id"`
+	Location    string    `db:"location"`
+	IssuedAt    time.Time `db:"issued_at"`
+	Day1Warning string    `db:"day1_warning"`
+	Day2Warning string    `db:"day2_warning"`
+	Day3Warning string    `db:"day3_warning"`
+	Day4Warning string    `db:"day4_warning"`
+	Day5Warning string    `db:"day5_warning"`
+	Day1Color   string    `db:"day1_color"`
+	Day2Color   string    `db:"day2_color"`
+	Day3Color   string    `db:"day3_color"`
+	Day4Color   string    `db:"day4_color"`
+	Day5Color   string    `db:"day5_color"`
+	CreatedAt   time.Time `db:"created_at"`
+}
+
+// DistrictWarningRaw stores the unparsed district warning JSON for historical reference.
+type DistrictWarningRaw struct {
+	ID        int       `db:"id"`
+	Location  string    `db:"location"`
+	Data      []byte    `db:"data"`
+	FetchedAt time.Time `db:"fetched_at"`
+>>>>>>> Stashed changes
 }

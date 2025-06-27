@@ -8,7 +8,7 @@ import (
 
 // InsertRadarSnapshot stores a radar snapshot.
 func InsertRadarSnapshot(ctx context.Context, r *model.RadarSnapshot) error {
-	conn, tx, err := getConnTransaction(ctx)
+	conn, tx, err := GetConnTransaction(ctx)
 	if err != nil {
 		return err
 	}

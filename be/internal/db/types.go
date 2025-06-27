@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
@@ -40,6 +41,7 @@ type ConnPool interface {
 	BeginTx(context.Context, pgx.TxOptions) (pgx.Tx, error)
 	Ping(context.Context) error
 	Close()
+	Acquire(context.Context) (*pgxpool.Conn, error)
 }
 
 type Driver struct {

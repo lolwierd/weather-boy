@@ -8,7 +8,7 @@ import (
 
 // InsertBulletin inserts a bulletin into the database.
 func InsertBulletin(ctx context.Context, b *model.Bulletin) error {
-	conn, tx, err := getConnTransaction(ctx)
+	conn, tx, err := GetConnTransaction(ctx)
 	if err != nil {
 		return err
 	}
@@ -35,7 +35,7 @@ func InsertBulletin(ctx context.Context, b *model.Bulletin) error {
 
 // InsertBulletinRaw records a fetched bulletin file path.
 func InsertBulletinRaw(ctx context.Context, br *model.BulletinRaw) error {
-	conn, tx, err := getConnTransaction(ctx)
+	conn, tx, err := GetConnTransaction(ctx)
 	if err != nil {
 		return err
 	}

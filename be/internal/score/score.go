@@ -12,8 +12,13 @@ import (
 type Repo interface {
 	LatestBulletin(ctx context.Context, loc string) (*model.Bulletin, error)
 	LatestRadarSnapshot(ctx context.Context, loc string) (*model.RadarSnapshot, error)
+<<<<<<< Updated upstream
 	NowcastPOP1H(ctx context.Context, loc string) (float64, error)
 	LatestNowcastCategories(ctx context.Context, loc string) (map[int]int16, error)
+=======
+	LatestNowcast(ctx context.Context, loc string) (*model.Nowcast, error)
+	LatestDistrictWarning(ctx context.Context, loc string) (*model.DistrictWarning, error)
+>>>>>>> Stashed changes
 }
 
 // repo is the default backing repo used in production.
@@ -30,8 +35,12 @@ func (dbRepo) LatestBulletin(ctx context.Context, loc string) (*model.Bulletin, 
 func (dbRepo) LatestRadarSnapshot(ctx context.Context, loc string) (*model.RadarSnapshot, error) {
 	return repository.LatestRadarSnapshot(ctx, loc)
 }
-func (dbRepo) NowcastPOP1H(ctx context.Context, loc string) (float64, error) {
-	return repository.NowcastPOP1H(ctx, loc)
+
+func (dbRepo) LatestNowcast(ctx context.Context, loc string) (*model.Nowcast, error) {
+	return repository.LatestNowcast(ctx, loc)
+}
+func (dbRepo) LatestDistrictWarning(ctx context.Context, loc string) (*model.DistrictWarning, error) {
+	return repository.LatestDistrictWarning(ctx, loc)
 }
 func (dbRepo) LatestNowcastCategories(ctx context.Context, loc string) (map[int]int16, error) {
 	return repository.LatestNowcastCategories(ctx, loc)
@@ -69,10 +78,27 @@ func riskLevel(ctx context.Context, r Repo, loc string) (Result, error) {
 		}
 	}
 
-	if pop, err := r.NowcastPOP1H(ctx, loc); err == nil {
-		if pop >= 0.7 {
-			res.Score += 0.2
-			res.Breakdown["nowcast"] = 0.2
+	if n, err := r.LatestNowcast(ctx, loc); err == nil {
+		if n.POP >= 0.7 {
+			res.Score += 0.5
+			res.Breakdown["nowcast_pop"] = 0.5
+		}
+		if n.MMPerHr >= 4.0 { // Threshold for heavy rain, adjust as needed
+			res.Score += 0.8 // Significant weight for heavy rain
+			res.Breakdown["nowcast_mm_per_hr"] = 0.8
+		}
+	}
+
+	if dw, err := r.LatestDistrictWarning(ctx, loc); err == nil {
+		// Check for heavy rain or flood warnings for Day 1 (next 24 hours)
+		if strings.Contains(strings.ToLower(dw.Day1Warning), "heavy rain") || strings.Contains(strings.ToLower(dw.Day1Warning), "very heavy rain") {
+			res.Score += 0.8 // Significant weight for immediate flood risk
+			res.Breakdown["district_warning_day1"] = 0.8
+		}
+		// Check for heavy rain or flood warnings for Day 2 (next 24-48 hours, still relevant for 12-24 hr flood potential)
+		if strings.Contains(strings.ToLower(dw.Day2Warning), "heavy rain") || strings.Contains(strings.ToLower(dw.Day2Warning), "very heavy rain") {
+			res.Score += 0.5 // Moderate weight for potential future flood risk
+			res.Breakdown["district_warning_day2"] = 0.5
 		}
 	}
 

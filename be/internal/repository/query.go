@@ -8,7 +8,7 @@ import (
 
 // LatestBulletin returns the most recent bulletin for a location.
 func LatestBulletin(ctx context.Context, loc string) (*model.Bulletin, error) {
-	_, tx, err := getConnTransaction(ctx)
+	_, tx, err := GetConnTransaction(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +24,7 @@ func LatestBulletin(ctx context.Context, loc string) (*model.Bulletin, error) {
 
 // LatestRadarSnapshot returns the latest radar snapshot for a location.
 func LatestRadarSnapshot(ctx context.Context, loc string) (*model.RadarSnapshot, error) {
-	_, tx, err := getConnTransaction(ctx)
+	_, tx, err := GetConnTransaction(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func LatestRadarSnapshot(ctx context.Context, loc string) (*model.RadarSnapshot,
 
 // NowcastPOP1H returns the probability of precipitation for the first hour of the latest nowcast.
 func NowcastPOP1H(ctx context.Context, loc string) (float64, error) {
-	_, tx, err := getConnTransaction(ctx)
+	_, tx, err := GetConnTransaction(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -55,7 +55,7 @@ func NowcastPOP1H(ctx context.Context, loc string) (float64, error) {
 
 // NowcastSlice returns the latest nowcast rows up to lead_min 240 minutes.
 func NowcastSlice(ctx context.Context, loc string) ([]model.Nowcast, error) {
-	_, tx, err := getConnTransaction(ctx)
+	_, tx, err := GetConnTransaction(ctx)
 	if err != nil {
 		return nil, err
 	}

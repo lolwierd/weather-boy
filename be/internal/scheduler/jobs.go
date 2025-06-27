@@ -50,6 +50,20 @@ func Start() {
 		logger.Error.Println("cron add nowcast:", err)
 	}
 
+	// District warnings every day 18:00 IST
+	_, err = c.AddFunc("CRON_TZ=Asia/Kolkata 0 18 * * *", func() {
+		// jitter 30s
+		jitter := time.Duration(rand.Intn(60)-30) * time.Second
+		time.Sleep(jitter)
+		logger.Info.Println("cron: district warning fetch")
+		if err := fetch.FetchDistrictWarnings(context.Background()); err != nil {
+			logger.Error.Println("fetch district warning:", err)
+		}
+	})
+	if err != nil {
+		logger.Error.Println("cron add district warning:", err)
+	}
+
 	c.Start()
 	for _, e := range c.Entries() {
 		logger.Info.Printf("cron next run %s\n", e.Next.Format(time.RFC3339))
@@ -67,6 +81,13 @@ func Start() {
 		logger.Info.Println("initial nowcast fetch")
 		if err := fetch.FetchIMDNowcast(context.Background()); err != nil {
 			logger.Error.Println("fetch nowcast:", err)
+		}
+	}()
+
+	go func() {
+		logger.Info.Println("initial district warning fetch")
+		if err := fetch.FetchDistrictWarnings(context.Background()); err != nil {
+			logger.Error.Println("fetch district warning:", err)
 		}
 	}()
 }

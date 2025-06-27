@@ -8,7 +8,7 @@ import (
 
 // InsertNowcast inserts a nowcast record.
 func InsertNowcast(ctx context.Context, n *model.Nowcast) error {
-	conn, tx, err := getConnTransaction(ctx)
+	conn, tx, err := GetConnTransaction(ctx)
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func InsertNowcast(ctx context.Context, n *model.Nowcast) error {
 
 // InsertNowcastRaw stores the raw nowcast JSON.
 func InsertNowcastRaw(ctx context.Context, nr *model.NowcastRaw) error {
-	conn, tx, err := getConnTransaction(ctx)
+	conn, tx, err := GetConnTransaction(ctx)
 	if err != nil {
 		return err
 	}
@@ -52,6 +52,7 @@ func InsertNowcastRaw(ctx context.Context, nr *model.NowcastRaw) error {
 	return tx.Commit(ctx)
 }
 
+<<<<<<< Updated upstream
 // InsertNowcastCategory stores a category value for a nowcast row.
 func InsertNowcastCategory(ctx context.Context, c *model.NowcastCategory) error {
 	conn, tx, err := getConnTransaction(ctx)
@@ -73,4 +74,27 @@ func InsertNowcastCategory(ctx context.Context, c *model.NowcastCategory) error 
 		return err
 	}
 	return tx.Commit(ctx)
+=======
+// LatestNowcast returns the latest nowcast record for a location.
+func LatestNowcast(ctx context.Context, loc string) (*model.Nowcast, error) {
+	conn, err := GetConn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Release()
+
+	n := &model.Nowcast{}
+	row := conn.QueryRow(ctx,
+		`SELECT id, location, captured_at, lead_min, pop, mm_per_hr, created_at
+         FROM nowcast
+         WHERE location = $1
+         ORDER BY captured_at DESC, created_at DESC
+         LIMIT 1`,
+		loc,
+	)
+	if err := row.Scan(&n.ID, &n.Location, &n.CapturedAt, &n.LeadMin, &n.POP, &n.MMPerHr, &n.CreatedAt); err != nil {
+		return nil, err
+	}
+	return n, nil
+>>>>>>> Stashed changes
 }

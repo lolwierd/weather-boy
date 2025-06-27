@@ -33,6 +33,7 @@ func bucketToMMPerHr(bucket int) float64 {
 // returns an array with a single object containing categorical fields and a
 // `color` code indicating rainfall likelihood.
 type districtNowcastResp struct {
+<<<<<<< Updated upstream
 	ObjID   string `json:"Obj_id"`
 	Date    string `json:"Date"`
 	TOI     string `json:"toi"`
@@ -58,6 +59,14 @@ type districtNowcastResp struct {
 	Cat17   string `json:"cat17"`
 	Cat18   string `json:"cat18"`
 	Cat19   string `json:"cat19"`
+=======
+	ObjID string `json:"Obj_id"`
+	Date  string `json:"Date"`
+	TOI   string `json:"toi"`
+	VUpto string `json:"vupto"`
+	Color string `json:"color"`
+	PrecipIntensity string `json:"precip_intensity"`
+>>>>>>> Stashed changes
 }
 
 // colorToPOP converts the IMD color code (1-4) to an approximate probability of
@@ -125,6 +134,11 @@ func FetchIMDNowcast(ctx context.Context) error {
 		col = 0
 	}
 
+	pi, err := strconv.Atoi(arr[0].PrecipIntensity)
+	if err != nil {
+		pi = 0
+	}
+
 	captured := time.Now()
 	if arr[0].Date != "" && arr[0].TOI != "" {
 		t, err := time.Parse("2006-01-02 1504", arr[0].Date+" "+arr[0].TOI)
@@ -138,7 +152,7 @@ func FetchIMDNowcast(ctx context.Context) error {
 		CapturedAt: captured,
 		LeadMin:    0,
 		POP:        colorToPOP(col),
-		MMPerHr:    0,
+		MMPerHr:    bucketToMMPerHr(pi),
 	}
 	if err := repository.InsertNowcast(ctx, &n); err != nil {
 		logger.Error.Println("insert nowcast:", err)
