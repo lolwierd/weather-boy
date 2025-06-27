@@ -33,40 +33,32 @@ func bucketToMMPerHr(bucket int) float64 {
 // returns an array with a single object containing categorical fields and a
 // `color` code indicating rainfall likelihood.
 type districtNowcastResp struct {
-<<<<<<< Updated upstream
-	ObjID   string `json:"Obj_id"`
-	Date    string `json:"Date"`
-	TOI     string `json:"toi"`
-	VUpto   string `json:"vupto"`
-	Color   string `json:"color"`
-	Message string `json:"message"`
-	Cat1    string `json:"cat1"`
-	Cat2    string `json:"cat2"`
-	Cat3    string `json:"cat3"`
-	Cat4    string `json:"cat4"`
-	Cat5    string `json:"cat5"`
-	Cat6    string `json:"cat6"`
-	Cat7    string `json:"cat7"`
-	Cat8    string `json:"cat8"`
-	Cat9    string `json:"cat9"`
-	Cat10   string `json:"cat10"`
-	Cat11   string `json:"cat11"`
-	Cat12   string `json:"cat12"`
-	Cat13   string `json:"cat13"`
-	Cat14   string `json:"cat14"`
-	Cat15   string `json:"cat15"`
-	Cat16   string `json:"cat16"`
-	Cat17   string `json:"cat17"`
-	Cat18   string `json:"cat18"`
-	Cat19   string `json:"cat19"`
-=======
-	ObjID string `json:"Obj_id"`
-	Date  string `json:"Date"`
-	TOI   string `json:"toi"`
-	VUpto string `json:"vupto"`
-	Color string `json:"color"`
+	ObjID           string `json:"Obj_id"`
+	Date            string `json:"Date"`
+	TOI             string `json:"toi"`
+	VUpto           string `json:"vupto"`
+	Color           string `json:"color"`
+	Message         string `json:"message"`
 	PrecipIntensity string `json:"precip_intensity"`
->>>>>>> Stashed changes
+	Cat1            string `json:"cat1"`
+	Cat2            string `json:"cat2"`
+	Cat3            string `json:"cat3"`
+	Cat4            string `json:"cat4"`
+	Cat5            string `json:"cat5"`
+	Cat6            string `json:"cat6"`
+	Cat7            string `json:"cat7"`
+	Cat8            string `json:"cat8"`
+	Cat9            string `json:"cat9"`
+	Cat10           string `json:"cat10"`
+	Cat11           string `json:"cat11"`
+	Cat12           string `json:"cat12"`
+	Cat13           string `json:"cat13"`
+	Cat14           string `json:"cat14"`
+	Cat15           string `json:"cat15"`
+	Cat16           string `json:"cat16"`
+	Cat17           string `json:"cat17"`
+	Cat18           string `json:"cat18"`
+	Cat19           string `json:"cat19"`
 }
 
 // colorToPOP converts the IMD color code (1-4) to an approximate probability of

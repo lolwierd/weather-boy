@@ -17,15 +17,15 @@ import (
 const imdDistrictWarningBaseURL = "https://mausam.imd.gov.in/api/warnings_district_api.php"
 
 type districtWarningResp struct {
-	ObjID    string `json:"Obj_id"`
-	Date     string `json:"Date"`
-	UTC      string `json:"UTC"`
-	District string `json:"District"`
-	Day1     string `json:"Day_1"`
-	Day2     string `json:"Day_2"`
-	Day3     string `json:"Day_3"`
-	Day4     string `json:"Day_4"`
-	Day5     string `json:"Day_5"`
+	ObjID     string `json:"Obj_id"`
+	Date      string `json:"Date"`
+	UTC       string `json:"UTC"`
+	District  string `json:"District"`
+	Day1      string `json:"Day_1"`
+	Day2      string `json:"Day_2"`
+	Day3      string `json:"Day_3"`
+	Day4      string `json:"Day_4"`
+	Day5      string `json:"Day_5"`
 	Day1Color string `json:"Day1_Color"`
 	Day2Color string `json:"Day2_Color"`
 	Day3Color string `json:"Day3_Color"`

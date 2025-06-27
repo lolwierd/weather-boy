@@ -52,10 +52,9 @@ func InsertNowcastRaw(ctx context.Context, nr *model.NowcastRaw) error {
 	return tx.Commit(ctx)
 }
 
-<<<<<<< Updated upstream
 // InsertNowcastCategory stores a category value for a nowcast row.
 func InsertNowcastCategory(ctx context.Context, c *model.NowcastCategory) error {
-	conn, tx, err := getConnTransaction(ctx)
+	conn, tx, err := GetConnTransaction(ctx)
 	if err != nil {
 		return err
 	}
@@ -74,7 +73,8 @@ func InsertNowcastCategory(ctx context.Context, c *model.NowcastCategory) error 
 		return err
 	}
 	return tx.Commit(ctx)
-=======
+}
+
 // LatestNowcast returns the latest nowcast record for a location.
 func LatestNowcast(ctx context.Context, loc string) (*model.Nowcast, error) {
 	conn, err := GetConn(ctx)
@@ -96,5 +96,4 @@ func LatestNowcast(ctx context.Context, loc string) (*model.Nowcast, error) {
 		return nil, err
 	}
 	return n, nil
->>>>>>> Stashed changes
 }
