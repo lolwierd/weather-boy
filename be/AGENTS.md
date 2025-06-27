@@ -141,7 +141,7 @@ All sensitive and environment-specific configuration is managed via environment 
 - `POSTGRES_HOST`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_PORT`
 - `OTELCOL_HOST`, `OTELCOL_PORT`
 - `LISTEN_ADDR`
-- `OPENAI_API_KEY`, `DATA_DIR`, `METNET_BASE_URL`, `IMD_NOWCAST_URL`
+- `OPENAI_API_KEY`, `DATA_DIR`, `METNET_BASE_URL`
 
 
 ## Development & Operations
