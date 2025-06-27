@@ -63,3 +63,23 @@ func TestInsertBulletinRaw(t *testing.T) {
 		t.Fatalf("expectations: %v", err)
 	}
 }
+
+func TestInsertIMDAPICall(t *testing.T) {
+	mock := setupMock(t)
+	defer mock.Close()
+
+	mock.ExpectBegin()
+	mock.ExpectQuery("INSERT INTO imd_api_log").
+		WithArgs("https://example.com", int64(123), pgxmock.AnyArg()).
+		WillReturnRows(pgxmock.NewRows([]string{"id"}).AddRow(1))
+	mock.ExpectCommit()
+
+	call := &model.IMDAPICall{Endpoint: "https://example.com", Bytes: 123, RequestedAt: time.Now()}
+	if err := InsertIMDAPICall(context.Background(), call); err != nil {
+		t.Fatalf("insert api log: %v", err)
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("expectations: %v", err)
+	}
+}
