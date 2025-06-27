@@ -46,3 +46,11 @@ type IMDAPICall struct {
 	Bytes       int64     `db:"bytes"`
 	RequestedAt time.Time `db:"requested_at"`
 }
+
+// NowcastRaw stores the unparsed nowcast JSON for historical reference.
+type NowcastRaw struct {
+	ID        int       `db:"id"`
+	Location  string    `db:"location"`
+	Data      []byte    `db:"data"`
+	FetchedAt time.Time `db:"fetched_at"`
+}

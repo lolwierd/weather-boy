@@ -9,10 +9,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/lolwierd/weatherboy/be/internal/config"
 	"github.com/lolwierd/weatherboy/be/internal/logger"
 	"github.com/lolwierd/weatherboy/be/internal/model"
 	"github.com/lolwierd/weatherboy/be/internal/repository"
 )
+
+const imdNowcastBaseURL = "https://mausam.imd.gov.in/api/nowcast_district_api.php"
 
 // bucketToMMPerHr converts a precip_intensity bucket to mm_per_hr.
 func bucketToMMPerHr(bucket int) float64 {
@@ -26,10 +29,9 @@ func bucketToMMPerHr(bucket int) float64 {
 	return mapping[bucket]
 }
 
-// districtNowcastResp represents the district level nowcast response.
-// The IMD endpoint returns an array with a single object containing
-// multiple categorical fields and a color code. We only care about the
-// overall "color" as an indicator of rainfall likelihood.
+// districtNowcastResp mirrors the IMD district nowcast response. The API
+// returns an array with a single object containing categorical fields and a
+// `color` code indicating rainfall likelihood.
 type districtNowcastResp struct {
 	ObjID string `json:"Obj_id"`
 	Date  string `json:"Date"`
@@ -38,7 +40,8 @@ type districtNowcastResp struct {
 	Color string `json:"color"`
 }
 
-// colorToPOP maps the IMD color code (0-4) to an approximate POP value.
+// colorToPOP converts the IMD color code (1-4) to an approximate probability of
+// precipitation value.
 func colorToPOP(c int) float64 {
 	switch c {
 	case 1:
@@ -56,7 +59,11 @@ func colorToPOP(c int) float64 {
 
 // FetchIMDNowcast fetches nowcast data from the IMD API for Vadodara and stores it.
 func FetchIMDNowcast(ctx context.Context) error {
-	const url = "https://mausam.imd.gov.in/api/nowcast_district_api.php?id=244"
+	loc, ok := config.LocationByName("vadodara")
+	if !ok || loc.DistrictID == 0 {
+		return fmt.Errorf("district id for vadodara not set")
+	}
+	url := fmt.Sprintf("%s?id=%d", imdNowcastBaseURL, loc.DistrictID)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return err
@@ -71,15 +78,28 @@ func FetchIMDNowcast(ctx context.Context) error {
 		return fmt.Errorf("imd nowcast status %s: %s", resp.Status, string(b))
 	}
 
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
 	var arr []districtNowcastResp
-	if err := json.NewDecoder(resp.Body).Decode(&arr); err != nil {
+	if err := json.Unmarshal(body, &arr); err != nil {
 		return err
 	}
 	if len(arr) == 0 {
 		return fmt.Errorf("empty nowcast response")
 	}
 
-	// Parse color as integer
+	raw := model.NowcastRaw{
+		Location:  "vadodara",
+		Data:      body,
+		FetchedAt: time.Now(),
+	}
+	if err := repository.InsertNowcastRaw(ctx, &raw); err != nil {
+		logger.Error.Println("insert nowcast raw:", err)
+	}
+
 	col, err := strconv.Atoi(arr[0].Color)
 	if err != nil {
 		col = 0
@@ -104,16 +124,15 @@ func FetchIMDNowcast(ctx context.Context) error {
 		logger.Error.Println("insert nowcast:", err)
 	}
 
-	// record API call metrics
 	call := model.IMDAPICall{
 		Endpoint:    url,
-		Bytes:       resp.ContentLength,
+		Bytes:       int64(len(body)),
 		RequestedAt: time.Now(),
 	}
 	if err := repository.InsertIMDAPICall(ctx, &call); err != nil {
 		logger.Error.Println("repository insert api log:", err)
 	} else {
-		logger.Info.Printf("IMD API call %s bytes=%d", url, resp.ContentLength)
+		logger.Info.Printf("IMD API call %s bytes=%d", url, len(body))
 	}
 	return nil
 }

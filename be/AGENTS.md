@@ -117,6 +117,13 @@ The Weather Boy backend is a Go service that periodically pulls multiple IMD dat
     - Fetches nowcast JSON every 15 minutes with ±30 s jitter.
     - Jobs run in the Asia/Kolkata timezone.
 
+### IMD Nowcast
+
+- **Fetcher:** `internal/fetch/imdnowcast.go`
+    - Builds `https://mausam.imd.gov.in/api/nowcast_district_api.php?id={DistrictID}` from static base URL.
+    - Stores the raw JSON payload in `nowcast_raw` for auditing.
+    - Extracts the `color` field and maps it to a POP value via `colorToPOP()`.
+
 ### Risk Scoring
 
 - **Logic:** `internal/score/score.go`

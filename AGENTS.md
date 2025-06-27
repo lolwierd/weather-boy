@@ -34,16 +34,24 @@ weather-boy/
 |-------------------------------------|-------------------------------------------------------------|---------|
 | **bulletin pdf**                    | `https://…/mcdata/{PdfSlug}`                                | daily ~18:30 IST |
 | **doppler radar**                   | `https://mausam.imd.gov.in/{RadarCode}_latest_ref.png`      | 5 min |
-| **districtWarning / nowcast json**  | IMD API                                                     | hourly / 30 min |
+| **districtWarning / nowcast json**  | `https://mausam.imd.gov.in/api/nowcast_district_api.php?id={DistrictID}` | hourly / 30 min |
 
 ### hard-coded cities (v0)
 
-vadodara | 22.30 N, 73.20 E  (primary)
+vadodara | 22.30 N, 73.20 E  (primary, id 244)
 mumbai   | 19.08 N, 72.88 E
 thane    | 19.22 N, 72.97 E
 pune     | 18.52 N, 73.85 E
 
 add a city by appending to `internal/config/locations.go`.
+
+### IMD nowcast notes
+
+Requests hit `https://mausam.imd.gov.in/api/nowcast_district_api.php?id={DistrictID}`.
+The response is an array with a single object containing fields like `cat1..cat19`,
+`toi`, `vupto` and a `color` code. The service stores the raw JSON in the
+`nowcast_raw` table and maps the color (1–4) to an approximate probability of
+precipitation for scoring.
 
 ---
 
