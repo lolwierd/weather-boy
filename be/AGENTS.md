@@ -140,6 +140,7 @@ The Weather Boy backend is a Go service that periodically pulls multiple IMD dat
     - Nowcast POP₁ₕ ≥0.7 → +0.2
     - Certain `catN` flags (2 and 3) → +0.1 each
     - Thresholds: ≥0.8 = RED, ≥0.5 = ORANGE, ≥0.3 = YELLOW, else GREEN.
+    - Breakdown only lists sensors that contributed
 
 ### Graceful Shutdown
 

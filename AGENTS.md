@@ -101,7 +101,7 @@ threshold → traffic-light:
 | ≥0.3  | YELLOW |
 | else  | GREEN  |
 
-return `score` and per-sensor breakdown so UI can justify itself.
+return `score` and per-sensor breakdown so UI can justify itself. The breakdown only lists sensors that contributed to the final score.
 
 ---
 
