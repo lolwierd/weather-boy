@@ -76,3 +76,34 @@ func NowcastSlice(ctx context.Context, loc string) ([]model.Nowcast, error) {
 	}
 	return list, rows.Err()
 }
+
+// LatestNowcastCategories returns category values for the latest nowcast row.
+func LatestNowcastCategories(ctx context.Context, loc string) (map[int]int16, error) {
+	_, tx, err := getConnTransaction(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	row := tx.QueryRow(ctx, `SELECT id FROM nowcast WHERE location=$1 ORDER BY captured_at DESC LIMIT 1`, loc)
+	var nid int
+	if err := row.Scan(&nid); err != nil {
+		return nil, err
+	}
+
+	rows, err := tx.Query(ctx, `SELECT category, value FROM nowcast_category WHERE nowcast_id=$1`, nid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	m := make(map[int]int16)
+	for rows.Next() {
+		var cat int
+		var val int16
+		if err := rows.Scan(&cat, &val); err != nil {
+			return nil, err
+		}
+		m[cat] = val
+	}
+	return m, rows.Err()
+}

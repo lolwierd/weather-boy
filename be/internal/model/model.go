@@ -54,3 +54,11 @@ type NowcastRaw struct {
 	Data      []byte    `db:"data"`
 	FetchedAt time.Time `db:"fetched_at"`
 }
+
+// NowcastCategory stores category flags for a nowcast row.
+type NowcastCategory struct {
+	ID        int   `db:"id"`
+	NowcastID int   `db:"nowcast_id"`
+	Category  int   `db:"category"`
+	Value     int16 `db:"value"`
+}

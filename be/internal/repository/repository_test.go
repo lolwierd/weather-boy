@@ -103,3 +103,23 @@ func TestInsertNowcastRaw(t *testing.T) {
 		t.Fatalf("expectations: %v", err)
 	}
 }
+
+func TestInsertNowcastCategory(t *testing.T) {
+	mock := setupMock(t)
+	defer mock.Close()
+
+	mock.ExpectBegin()
+	mock.ExpectQuery("INSERT INTO nowcast_category").
+		WithArgs(1, 2, int16(3)).
+		WillReturnRows(pgxmock.NewRows([]string{"id"}).AddRow(1))
+	mock.ExpectCommit()
+
+	c := &model.NowcastCategory{NowcastID: 1, Category: 2, Value: 3}
+	if err := InsertNowcastCategory(context.Background(), c); err != nil {
+		t.Fatalf("insert cat: %v", err)
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatalf("expectations: %v", err)
+	}
+}

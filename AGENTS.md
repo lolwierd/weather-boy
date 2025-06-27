@@ -51,7 +51,37 @@ Requests hit `https://mausam.imd.gov.in/api/nowcast_district_api.php?id={Distric
 The response is an array with a single object containing fields like `cat1..cat19`,
 `toi`, `vupto` and a `color` code. The service stores the raw JSON in the
 `nowcast_raw` table and maps the color (1–4) to an approximate probability of
-precipitation for scoring.
+precipitation for scoring. Each `catN` field is a small integer flag describing
+specific weather phenomena (e.g. heavy rain, thunderstorm, gusty wind).  Values
+are persisted in the `nowcast_category` table with columns `(nowcast_id,
+category,value)` for future analytics.
+
+Currently categories `2` and `3` are treated as severe weather indicators and
+contribute `+0.1` each to the risk score when non-zero.
+
+Approximate category meanings (subject to change):
+
+| cat# | description           |
+|------|----------------------|
+| 1    | light rain            |
+| 2    | heavy rain            |
+| 3    | thunderstorm          |
+| 4    | gusty wind            |
+| 5    | squall                |
+| 6    | hail                  |
+| 7    | dust storm            |
+| 8    | fog                   |
+| 9    | heat wave             |
+| 10   | cold wave             |
+| 11   | low cloud             |
+| 12   | cyclone               |
+| 13   | flood                 |
+| 14   | extreme rainfall      |
+| 15   | lightning             |
+| 16   | snowfall              |
+| 17   | thunder with hail     |
+| 18   | squally wind          |
+| 19   | cloudburst            |
 
 ---
 

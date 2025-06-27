@@ -123,6 +123,7 @@ The Weather Boy backend is a Go service that periodically pulls multiple IMD dat
     - Builds `https://mausam.imd.gov.in/api/nowcast_district_api.php?id={DistrictID}` from static base URL.
     - Stores the raw JSON payload in `nowcast_raw` for auditing.
     - Extracts the `color` field and maps it to a POP value via `colorToPOP()`.
+    - Persists `cat1..cat19` flags in `nowcast_category` linked to each nowcast row.
 
 ### Risk Scoring
 
@@ -130,6 +131,7 @@ The Weather Boy backend is a Go service that periodically pulls multiple IMD dat
     - Bulletin heavy/very-heavy mention → +0.4
     - Radar ≥45 dBZ within 40 km → +0.4
     - Nowcast POP₁ₕ ≥0.7 → +0.2
+    - Certain `catN` flags (2 and 3) → +0.1 each
     - Thresholds: ≥0.8 = RED, ≥0.5 = ORANGE, ≥0.3 = YELLOW, else GREEN.
 
 ### Graceful Shutdown
