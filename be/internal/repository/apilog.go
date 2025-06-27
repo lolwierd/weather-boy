@@ -8,7 +8,7 @@ import (
 
 // InsertIMDAPICall stores an IMD API usage record.
 func InsertIMDAPICall(ctx context.Context, l *model.IMDAPICall) error {
-	conn, tx, err := getConnTransaction(ctx)
+	conn, tx, err := GetConnTransaction(ctx)
 	if err != nil {
 		return err
 	}

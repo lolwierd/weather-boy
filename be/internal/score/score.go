@@ -30,6 +30,7 @@ func (dbRepo) LatestBulletin(ctx context.Context, loc string) (*model.Bulletin, 
 func (dbRepo) LatestRadarSnapshot(ctx context.Context, loc string) (*model.RadarSnapshot, error) {
 	return repository.LatestRadarSnapshot(ctx, loc)
 }
+
 func (dbRepo) NowcastPOP1H(ctx context.Context, loc string) (float64, error) {
 	return repository.NowcastPOP1H(ctx, loc)
 }

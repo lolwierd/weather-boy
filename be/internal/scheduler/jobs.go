@@ -24,7 +24,7 @@ func Start() {
 
 	// Bulletin every day 18:30 IST
 	_, err := c.AddFunc("CRON_TZ=Asia/Kolkata 30 18 * * *", func() {
-		// jitter ±30s
+		// jitter +/-30s
 		jitter := time.Duration(rand.Intn(60)-30) * time.Second
 		time.Sleep(jitter)
 		logger.Info.Println("cron: bulletin fetch")
@@ -38,7 +38,7 @@ func Start() {
 
 	// Nowcast every 15 minutes with jitter
 	_, err = c.AddFunc("CRON_TZ=Asia/Kolkata */15 * * * *", func() {
-		// jitter ±30s
+		// jitter +/-30s
 		jitter := time.Duration(rand.Intn(60)-30) * time.Second
 		time.Sleep(jitter)
 		logger.Info.Println("cron: nowcast fetch")
@@ -48,6 +48,20 @@ func Start() {
 	})
 	if err != nil {
 		logger.Error.Println("cron add nowcast:", err)
+	}
+
+	// District warnings every day 18:00 IST
+	_, err = c.AddFunc("CRON_TZ=Asia/Kolkata 0 18 * * *", func() {
+		// jitter +/-30s
+		jitter := time.Duration(rand.Intn(60)-30) * time.Second
+		time.Sleep(jitter)
+		logger.Info.Println("cron: district warning fetch")
+		if err := fetch.FetchDistrictWarnings(context.Background()); err != nil {
+			logger.Error.Println("fetch district warning:", err)
+		}
+	})
+	if err != nil {
+		logger.Error.Println("cron add district warning:", err)
 	}
 
 	c.Start()
@@ -67,6 +81,13 @@ func Start() {
 		logger.Info.Println("initial nowcast fetch")
 		if err := fetch.FetchIMDNowcast(context.Background()); err != nil {
 			logger.Error.Println("fetch nowcast:", err)
+		}
+	}()
+
+	go func() {
+		logger.Info.Println("initial district warning fetch")
+		if err := fetch.FetchDistrictWarnings(context.Background()); err != nil {
+			logger.Error.Println("fetch district warning:", err)
 		}
 	}()
 }

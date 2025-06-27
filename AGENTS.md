@@ -127,7 +127,7 @@ return `score` and per-sensor breakdown so UI can justify itself.
 
 after IMD whitelist:
 
-- [ ] `fetch/district_warning.go`
+- [x] `fetch/district_warning.go`
 - [x] swap MetNet for official nowcast JSON
 
 ---
