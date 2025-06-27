@@ -42,7 +42,8 @@ func FetchBulletinOnce(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	if _, err := io.Copy(f, resp.Body); err != nil {
+	n, err := io.Copy(f, resp.Body)
+	if err != nil {
 		f.Close()
 		return err
 	}
@@ -53,6 +54,17 @@ func FetchBulletinOnce(ctx context.Context) error {
 	br := model.BulletinRaw{Path: path, FetchedAt: time.Now()}
 	if err := repository.InsertBulletinRaw(ctx, &br); err != nil {
 		logger.Error.Println("repository insert bulletin raw:", err)
+	}
+
+	call := model.IMDAPICall{
+		Endpoint:    url,
+		Bytes:       n,
+		RequestedAt: time.Now(),
+	}
+	if err := repository.InsertIMDAPICall(ctx, &call); err != nil {
+		logger.Error.Println("repository insert api log:", err)
+	} else {
+		logger.Info.Printf("IMD API call %s bytes=%d", url, n)
 	}
 	return nil
 }

@@ -38,3 +38,11 @@ type BulletinRaw struct {
 	Path      string    `db:"path"`
 	FetchedAt time.Time `db:"fetched_at"`
 }
+
+// IMDAPICall records each call made to IMD endpoints.
+type IMDAPICall struct {
+	ID          int       `db:"id"`
+	Endpoint    string    `db:"endpoint"`
+	Bytes       int64     `db:"bytes"`
+	RequestedAt time.Time `db:"requested_at"`
+}
