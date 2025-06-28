@@ -14,6 +14,7 @@ type Repo interface {
 	LatestRadarSnapshot(ctx context.Context, loc string) (*model.RadarSnapshot, error)
 	NowcastPOP1H(ctx context.Context, loc string) (float64, error)
 	LatestNowcastCategories(ctx context.Context, loc string) (map[int]int16, error)
+	LatestDistrictWarning(ctx context.Context, loc string) (*model.DistrictWarning, error)
 }
 
 // repo is the default backing repo used in production.
@@ -36,6 +37,9 @@ func (dbRepo) NowcastPOP1H(ctx context.Context, loc string) (float64, error) {
 }
 func (dbRepo) LatestNowcastCategories(ctx context.Context, loc string) (map[int]int16, error) {
 	return repository.LatestNowcastCategories(ctx, loc)
+}
+func (dbRepo) LatestDistrictWarning(ctx context.Context, loc string) (*model.DistrictWarning, error) {
+	return repository.LatestDistrictWarning(ctx, loc)
 }
 
 // Result is the risk score output.
@@ -80,16 +84,42 @@ func riskLevel(ctx context.Context, r Repo, loc string) (Result, error) {
 	if cats, err := r.LatestNowcastCategories(ctx, loc); err == nil {
 		catScore := 0.0
 		severeMap := map[int]float64{2: 0.1, 3: 0.1}
+		alertCats := []int{13, 14, 19}
+		triggeredAlert := false
 		for k, val := range cats {
 			if val > 0 {
 				if sc, ok := severeMap[k]; ok {
 					catScore += sc
 				}
+				for _, ac := range alertCats {
+					if k == ac {
+						triggeredAlert = true
+					}
+				}
 			}
 		}
-		if catScore > 0 {
+		if triggeredAlert {
+			res.Score = 0.9
+			res.Breakdown["nowcast_alert"] = 0.9
+		} else if catScore > 0 {
 			res.Score += catScore
 			res.Breakdown["categories"] = catScore
+		}
+	}
+
+	if dw, err := r.LatestDistrictWarning(ctx, loc); err == nil {
+		color := strings.ToLower(dw.Day1Color)
+		switch color {
+		case "red":
+			if res.Score < 0.8 {
+				res.Score = 0.8
+			}
+			res.Breakdown["district_warning"] = 0.8
+		case "orange":
+			if res.Score < 0.5 {
+				res.Score = 0.5
+			}
+			res.Breakdown["district_warning"] = 0.5
 		}
 	}
 
