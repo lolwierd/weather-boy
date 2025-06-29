@@ -13,6 +13,7 @@ type stubRepo struct {
 	rng      float64
 	pop      float64
 	cats     map[int]int16
+	warn     string
 }
 
 func (s stubRepo) LatestBulletin(ctx context.Context, loc string) (*model.Bulletin, error) {
@@ -39,6 +40,12 @@ func (s stubRepo) LatestNowcastCategories(ctx context.Context, loc string) (map[
 	}
 	return s.cats, nil
 }
+func (s stubRepo) LatestDistrictWarning(ctx context.Context, loc string) (*model.DistrictWarning, error) {
+	if s.warn == "" {
+		return nil, context.Canceled
+	}
+	return &model.DistrictWarning{Day1Color: s.warn}, nil
+}
 
 func TestRiskLevels(t *testing.T) {
 	cases := []struct {
@@ -46,10 +53,12 @@ func TestRiskLevels(t *testing.T) {
 		repo  stubRepo
 		level string
 	}{
-		{"red", stubRepo{"heavy rain", 50, 30, 0.8, map[int]int16{2: 1}}, "RED"},
-		{"orange", stubRepo{"heavy rain", 0, 0, 0.8, map[int]int16{2: 1}}, "ORANGE"},
-		{"orange2", stubRepo{"heavy rain", 0, 0, 0, map[int]int16{2: 1}}, "ORANGE"},
-		{"green", stubRepo{"", 0, 0, 0, nil}, "GREEN"},
+		{"red", stubRepo{"heavy rain", 50, 30, 0.8, map[int]int16{2: 1}, ""}, "RED"},
+		{"orange", stubRepo{"heavy rain", 0, 0, 0.8, map[int]int16{2: 1}, ""}, "ORANGE"},
+		{"orange2", stubRepo{"heavy rain", 0, 0, 0, map[int]int16{2: 1}, ""}, "ORANGE"},
+		{"catalert", stubRepo{"", 0, 0, 0, map[int]int16{14: 1}, ""}, "RED"},
+		{"warnorange", stubRepo{"", 0, 0, 0, nil, "Orange"}, "ORANGE"},
+		{"green", stubRepo{"", 0, 0, 0, nil, ""}, "GREEN"},
 	}
 	for _, tc := range cases {
 		SetRepo(tc.repo)
