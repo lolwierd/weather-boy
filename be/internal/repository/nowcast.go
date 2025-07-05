@@ -8,76 +8,67 @@ import (
 
 // InsertNowcast inserts a nowcast record.
 func InsertNowcast(ctx context.Context, n *model.Nowcast) error {
-	conn, tx, err := GetConnTransaction(ctx)
+	conn, err := getConn(ctx)
 	if err != nil {
 		return err
 	}
-	if conn != nil {
-		defer conn.Release()
-	}
+	defer conn.Release()
 
-	row := tx.QueryRow(ctx,
+	row := conn.QueryRow(ctx,
 		`INSERT INTO nowcast (location, captured_at, lead_min, pop, mm_per_hr)
          VALUES ($1,$2,$3,$4,$5)
          RETURNING id, created_at`,
 		n.Location, n.CapturedAt, n.LeadMin, n.POP, n.MMPerHr,
 	)
 	if err := row.Scan(&n.ID, &n.CreatedAt); err != nil {
-		_ = tx.Rollback(ctx)
 		return err
 	}
-	return tx.Commit(ctx)
+	return nil
 }
 
 // InsertNowcastRaw stores the raw nowcast JSON.
 func InsertNowcastRaw(ctx context.Context, nr *model.NowcastRaw) error {
-	conn, tx, err := GetConnTransaction(ctx)
+	conn, err := getConn(ctx)
 	if err != nil {
 		return err
 	}
-	if conn != nil {
-		defer conn.Release()
-	}
+	defer conn.Release()
 
-	row := tx.QueryRow(ctx,
+	row := conn.QueryRow(ctx,
 		`INSERT INTO nowcast_raw (location, data, fetched_at)
          VALUES ($1,$2,$3)
          RETURNING id`,
 		nr.Location, nr.Data, nr.FetchedAt,
 	)
 	if err := row.Scan(&nr.ID); err != nil {
-		_ = tx.Rollback(ctx)
 		return err
 	}
-	return tx.Commit(ctx)
+	return nil
 }
 
 // InsertNowcastCategory stores a category value for a nowcast row.
 func InsertNowcastCategory(ctx context.Context, c *model.NowcastCategory) error {
-	conn, tx, err := GetConnTransaction(ctx)
+	conn, err := getConn(ctx)
 	if err != nil {
 		return err
 	}
-	if conn != nil {
-		defer conn.Release()
-	}
+	defer conn.Release()
 
-	row := tx.QueryRow(ctx,
+	row := conn.QueryRow(ctx,
 		`INSERT INTO nowcast_category (nowcast_id, category, value)
          VALUES ($1,$2,$3)
          RETURNING id`,
 		c.NowcastID, c.Category, c.Value,
 	)
 	if err := row.Scan(&c.ID); err != nil {
-		_ = tx.Rollback(ctx)
 		return err
 	}
-	return tx.Commit(ctx)
+	return nil
 }
 
 // LatestNowcast returns the latest nowcast record for a location.
 func LatestNowcast(ctx context.Context, loc string) (*model.Nowcast, error) {
-	conn, err := GetConn(ctx)
+	conn, err := getConn(ctx)
 	if err != nil {
 		return nil, err
 	}

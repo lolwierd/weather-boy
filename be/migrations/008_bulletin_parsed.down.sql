@@ -1,0 +1,1 @@
+DROP TABLE bulletin_parsed;

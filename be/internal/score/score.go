@@ -2,6 +2,7 @@ package score
 
 import (
 	"context"
+	"strconv"
 	"strings"
 
 	"github.com/lolwierd/weatherboy/be/internal/model"
@@ -15,6 +16,8 @@ type Repo interface {
 	NowcastPOP1H(ctx context.Context, loc string) (float64, error)
 	LatestNowcastCategories(ctx context.Context, loc string) (map[int]int16, error)
 	LatestDistrictWarning(ctx context.Context, loc string) (*model.DistrictWarning, error)
+	LatestRiverBasinQPF(ctx context.Context, loc string) (*model.RiverBasinQPF, error)
+	LatestAWSARG(ctx context.Context, loc string) (*model.AWSARG, error)
 }
 
 // repo is the default backing repo used in production.
@@ -31,7 +34,6 @@ func (dbRepo) LatestBulletin(ctx context.Context, loc string) (*model.Bulletin, 
 func (dbRepo) LatestRadarSnapshot(ctx context.Context, loc string) (*model.RadarSnapshot, error) {
 	return repository.LatestRadarSnapshot(ctx, loc)
 }
-
 func (dbRepo) NowcastPOP1H(ctx context.Context, loc string) (float64, error) {
 	return repository.NowcastPOP1H(ctx, loc)
 }
@@ -40,6 +42,12 @@ func (dbRepo) LatestNowcastCategories(ctx context.Context, loc string) (map[int]
 }
 func (dbRepo) LatestDistrictWarning(ctx context.Context, loc string) (*model.DistrictWarning, error) {
 	return repository.LatestDistrictWarning(ctx, loc)
+}
+func (dbRepo) LatestRiverBasinQPF(ctx context.Context, loc string) (*model.RiverBasinQPF, error) {
+	return repository.LatestRiverBasinQPF(ctx, loc)
+}
+func (dbRepo) LatestAWSARG(ctx context.Context, loc string) (*model.AWSARG, error) {
+	return repository.LatestAWSARG(ctx, loc)
 }
 
 // Result is the risk score output.
@@ -67,10 +75,8 @@ func riskLevel(ctx context.Context, r Repo, loc string) (Result, error) {
 
 	if rad, err := r.LatestRadarSnapshot(ctx, loc); err == nil {
 		if rad.MaxDBZ >= 45 {
-			if rad.RangeKM == nil || *rad.RangeKM <= 40 {
-				res.Score += 0.4
-				res.Breakdown["radar"] = 0.4
-			}
+			res.Score += 0.4
+			res.Breakdown["radar"] = 0.4
 		}
 	}
 
@@ -120,6 +126,21 @@ func riskLevel(ctx context.Context, r Repo, loc string) (Result, error) {
 				res.Score = 0.5
 			}
 			res.Breakdown["district_warning"] = 0.5
+		}
+	}
+
+	if qpf, err := r.LatestRiverBasinQPF(ctx, loc); err == nil {
+		day1, err := strconv.ParseFloat(qpf.Day1, 64)
+		if err == nil && day1 > 0 {
+			res.Score += 0.1
+			res.Breakdown["river_basin"] = 0.1
+		}
+	}
+
+	if aws, err := r.LatestAWSARG(ctx, loc); err == nil {
+		if aws.Rainfall > 5 {
+			res.Score += 0.1
+			res.Breakdown["aws_arg_rainfall"] = 0.1
 		}
 	}
 

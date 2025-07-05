@@ -3,56 +3,48 @@ package repository
 import (
 	"context"
 
+
 	"github.com/lolwierd/weatherboy/be/internal/model"
 )
 
-// InsertBulletin inserts a bulletin into the database.
-func InsertBulletin(ctx context.Context, b *model.Bulletin) error {
-	conn, tx, err := GetConnTransaction(ctx)
+const insertBulletinRaw = `
+INSERT INTO bulletin_raw (path, fetched_at)
+VALUES ($1, $2)
+RETURNING id
+`
+
+// InsertBulletinRaw inserts a new bulletin raw record into the database.
+func InsertBulletinRaw(ctx context.Context, br *model.BulletinRaw) error {
+	conn, err := getConn(ctx)
 	if err != nil {
 		return err
 	}
-	if conn != nil {
-		defer conn.Release()
-	}
+	defer conn.Release()
 
-	row := tx.QueryRow(ctx,
-		`INSERT INTO bulletin (location, issued_at, text)
-         VALUES ($1,$2,$3)
-         RETURNING id, created_at`,
-		b.Location, b.IssuedAt, b.Text,
-	)
-	if err := row.Scan(&b.ID, &b.CreatedAt); err != nil {
-		_ = tx.Rollback(ctx)
-		return err
-	}
-
-	if err := tx.Commit(ctx); err != nil {
+	row := conn.QueryRow(ctx, insertBulletinRaw, br.Path, br.FetchedAt)
+	if err := row.Scan(&br.ID); err != nil {
 		return err
 	}
 	return nil
 }
 
-// InsertBulletinRaw records a fetched bulletin file path.
-func InsertBulletinRaw(ctx context.Context, br *model.BulletinRaw) error {
-	conn, tx, err := GetConnTransaction(ctx)
+const insertParsedBulletin = `
+INSERT INTO bulletin_parsed (bulletin_raw_id, location, forecast)
+VALUES ($1, $2, $3)
+RETURNING id, fetched_at
+`
+
+// InsertParsedBulletin inserts a new parsed bulletin record into the database.
+func InsertParsedBulletin(ctx context.Context, b *model.BulletinParsed) error {
+	conn, err := getConn(ctx)
 	if err != nil {
 		return err
 	}
-	if conn != nil {
-		defer conn.Release()
-	}
+	defer conn.Release()
 
-	row := tx.QueryRow(ctx,
-		`INSERT INTO bulletin_raw (path, fetched_at)
-         VALUES ($1,$2)
-         RETURNING id`,
-		br.Path, br.FetchedAt,
-	)
-	var id int
-	if err := row.Scan(&id); err != nil {
-		_ = tx.Rollback(ctx)
+	row := conn.QueryRow(ctx, insertParsedBulletin, b.BulletinRawID, b.Location, b.Forecast)
+	if err := row.Scan(&b.ID, &b.FetchedAt); err != nil {
 		return err
 	}
-	return tx.Commit(ctx)
+	return nil
 }

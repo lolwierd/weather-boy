@@ -39,7 +39,8 @@ The Weather Boy backend is a Go service that periodically pulls multiple IMD dat
     - `config/` – Environment loading and location list
     - `constants/` – Service-wide constants
     - `db/` – Database connection and utilities
-    - `fetch/` – IMD data fetchers
+    - `fetch/` – External data fetchers (nowcast, district warning, radar, river basin, AWS ARG, bulletin PDFs, etc.)
+    - `parse/` – Parsing / AI summarisation logic (bulletin, radar, etc.)
     - `handlers/` – HTTP route handlers
     - `healthcheck/` – Health monitoring logic
     - `logger/` – Zap-based structured logging
@@ -48,11 +49,12 @@ The Weather Boy backend is a Go service that periodically pulls multiple IMD dat
     - `otelware/` – Fiber middleware for tracing/metrics
     - `repository/` – Database access helpers
     - `router/` – HTTP server and route registration
-    - `scheduler/` – Cron jobs for fetching data
+    - `scheduler/` – Cron jobs for fetching and parsing data
     - `score/` – Risk scoring logic
     - `shutdown/` – Graceful shutdown logic
     - `types/` – Shared types
     - `utils/` – Utility functions
+- `migrations/` – SQL migrations managed by `goose`
 - `Makefile` – Build, run, migrate, dev, and clean commands
 - `Dockerfile` – Containerization
 
@@ -125,12 +127,40 @@ The Weather Boy backend is a Go service that periodically pulls multiple IMD dat
     - Extracts the `color` field and maps it to a POP value via `colorToPOP()`.
     - Persists `cat1..cat19` flags in `nowcast_category` linked to each nowcast row.
 
-### District Warnings
+### District & State Warnings
 
-- **Fetcher:** `internal/fetch/districtwarning.go`
+- **Fetcher:** `internal/fetch/district_warning.go`
     - Hits `https://mausam.imd.gov.in/api/warnings_district_api.php?id={DistrictID}`.
     - Stores raw JSON in `district_warning_raw`.
-    - Parses day 1–5 warning text and color codes into `district_warning`.
+    - Parses day-1–5 warning text and color codes into `district_warning`.
+
+### Doppler Radar
+
+- **Fetcher:** `internal/fetch/radar.go`
+    - Downloads the latest Doppler radar composite PNG for the target station.
+- **Parser:** `internal/parse/radar.go`
+    - Converts IMD colour palette to dBZ.
+    - Calculates max dBZ within 40 km radius for each location.
+    - Persists to `radar` table (`location`, `max_dbz`, `captured_at`).
+
+### Bulletin PDF
+
+- **Fetcher:** `internal/fetch/bulletin.go`
+    - Downloads the daily district bulletin PDF.
+- **Parser / AI Summariser:** `internal/parse/bulletin.go`
+    - Extracts text via PDF-to-text, summarises with Gemini Flash, stores structured forecast in `bulletin_parsed`.
+
+### River Basin QPF
+
+- **Fetcher:** `internal/fetch/riverbasin.go`
+    - Retrieves JSON QPF for major river basins.
+    - Persists to `river_basin_qpf` table.
+
+### AWS / ARG Observations
+
+- **Fetcher:** `internal/fetch/awsarg.go`
+    - Ingests automatic weather-station / rain-gauge 1-hour precipitation totals.
+    - Persists to `aws_arg` table.
 
 ### Risk Scoring
 

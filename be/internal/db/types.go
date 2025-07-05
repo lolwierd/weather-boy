@@ -42,6 +42,7 @@ type ConnPool interface {
 	Ping(context.Context) error
 	Close()
 	Acquire(context.Context) (*pgxpool.Conn, error)
+	QueryRow(ctx context.Context, sql string, arguments ...any) pgx.Row
 }
 
 type Driver struct {

@@ -8,53 +8,47 @@ import (
 
 // InsertDistrictWarning inserts a district warning record.
 func InsertDistrictWarning(ctx context.Context, dw *model.DistrictWarning) error {
-	conn, tx, err := GetConnTransaction(ctx)
+	conn, err := getConn(ctx)
 	if err != nil {
 		return err
 	}
-	if conn != nil {
-		defer conn.Release()
-	}
+	defer conn.Release()
 
-	row := tx.QueryRow(ctx,
+	row := conn.QueryRow(ctx,
 		`INSERT INTO district_warning (location, issued_at, day1_warning, day2_warning, day3_warning, day4_warning, day5_warning, day1_color, day2_color, day3_color, day4_color, day5_color)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
          RETURNING id, created_at`,
 		dw.Location, dw.IssuedAt, dw.Day1Warning, dw.Day2Warning, dw.Day3Warning, dw.Day4Warning, dw.Day5Warning, dw.Day1Color, dw.Day2Color, dw.Day3Color, dw.Day4Color, dw.Day5Color,
 	)
 	if err := row.Scan(&dw.ID, &dw.CreatedAt); err != nil {
-		_ = tx.Rollback(ctx)
 		return err
 	}
-	return tx.Commit(ctx)
+	return nil
 }
 
 // InsertDistrictWarningRaw stores the raw district warning JSON.
 func InsertDistrictWarningRaw(ctx context.Context, dwr *model.DistrictWarningRaw) error {
-	conn, tx, err := GetConnTransaction(ctx)
+	conn, err := getConn(ctx)
 	if err != nil {
 		return err
 	}
-	if conn != nil {
-		defer conn.Release()
-	}
+	defer conn.Release()
 
-	row := tx.QueryRow(ctx,
+	row := conn.QueryRow(ctx,
 		`INSERT INTO district_warning_raw (location, data, fetched_at)
          VALUES ($1,$2,$3)
          RETURNING id`,
 		dwr.Location, dwr.Data, dwr.FetchedAt,
 	)
 	if err := row.Scan(&dwr.ID); err != nil {
-		_ = tx.Rollback(ctx)
 		return err
 	}
-	return tx.Commit(ctx)
+	return nil
 }
 
 // LatestDistrictWarning returns the latest district warning record for a location.
 func LatestDistrictWarning(ctx context.Context, loc string) (*model.DistrictWarning, error) {
-	conn, err := GetConn(ctx)
+	conn, err := getConn(ctx)
 	if err != nil {
 		return nil, err
 	}

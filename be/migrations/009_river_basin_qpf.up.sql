@@ -1,0 +1,16 @@
+CREATE TABLE river_basin_qpf (
+    id SERIAL PRIMARY KEY,
+    basin_id INT NOT NULL,
+    date TIMESTAMPTZ NOT NULL,
+    fmo VARCHAR(255) NOT NULL,
+    basin VARCHAR(255) NOT NULL,
+    sub_basin VARCHAR(255) NOT NULL,
+    area VARCHAR(255) NOT NULL,
+    day1 VARCHAR(255) NOT NULL,
+    day2 VARCHAR(255) NOT NULL,
+    day3 VARCHAR(255) NOT NULL,
+    day4 VARCHAR(255) NOT NULL,
+    day5 VARCHAR(255) NOT NULL,
+    aap VARCHAR(255) NOT NULL,
+    fetched_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

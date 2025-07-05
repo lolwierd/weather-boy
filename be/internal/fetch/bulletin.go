@@ -12,10 +12,11 @@ import (
 	"github.com/lolwierd/weatherboy/be/internal/config"
 	"github.com/lolwierd/weatherboy/be/internal/logger"
 	"github.com/lolwierd/weatherboy/be/internal/model"
+	"github.com/lolwierd/weatherboy/be/internal/parse"
 	"github.com/lolwierd/weatherboy/be/internal/repository"
 )
 
-// FetchBulletinOnce downloads today's Gujarat bulletin PDF and stores it.
+// FetchBulletinOnce downloads today's Gujarat bulletin PDF, parses it, and stores it.
 func FetchBulletinOnce(ctx context.Context) error {
 	const url = "https://mausam.imd.gov.in/ahmedabad/mcdata/state.pdf"
 
@@ -54,6 +55,22 @@ func FetchBulletinOnce(ctx context.Context) error {
 	br := model.BulletinRaw{Path: path, FetchedAt: time.Now()}
 	if err := repository.InsertBulletinRaw(ctx, &br); err != nil {
 		logger.Error.Println("repository insert bulletin raw:", err)
+		return err
+	}
+
+	forecast, err := parse.ParseBulletinPDF(ctx, path, "Vadodara")
+	if err != nil {
+		return err
+	}
+
+	bp := model.BulletinParsed{
+		BulletinRawID: br.ID,
+		Location:      "vadodara",
+		Forecast:      forecast,
+		FetchedAt:     time.Now(),
+	}
+	if err := repository.InsertParsedBulletin(ctx, &bp); err != nil {
+		return err
 	}
 
 	call := model.IMDAPICall{

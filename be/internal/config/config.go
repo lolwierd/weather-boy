@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 	"sync"
 
@@ -10,17 +11,23 @@ import (
 var once sync.Once
 
 var (
-	OpenAIAPIKey  string
-	DataDir       string
-	MetNetBaseURL string
+	// DataDir is the directory where data files are stored.
+	DataDir = "data"
+	// OpenAIAPIKey is the API key for the OpenAI API.
+	OpenAIAPIKey = ""
 )
 
-// LoadEnv loads environment variables from .env once and populates typed vars.
+// LoadEnv loads environment variables from a .env file.
 func LoadEnv() {
-	once.Do(func() {
-		_ = godotenv.Load()
-		OpenAIAPIKey = os.Getenv("OPENAI_API_KEY")
-		DataDir = os.Getenv("DATA_DIR")
-		MetNetBaseURL = os.Getenv("METNET_BASE_URL")
-	})
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("No .env file found")
+	}
+
+	if d := os.Getenv("DATA_DIR"); d != "" {
+		DataDir = d
+	}
+	if k := os.Getenv("OPENAI_API_KEY"); k != "" {
+		OpenAIAPIKey = k
+	}
 }
